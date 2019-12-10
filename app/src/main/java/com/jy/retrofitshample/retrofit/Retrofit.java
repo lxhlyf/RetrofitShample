@@ -14,9 +14,9 @@ import okhttp3.OkHttpClient;
 public class Retrofit {
 
     //根地址
-    private String mBaseUrl;
+    final String mBaseUrl;
     //OkHttp3的请求引擎
-    private okhttp3.Call.Factory mCallFactory;
+    final okhttp3.Call.Factory mCallFactory;
     //存放网络请求方法和方法的参数
     private Map<Method, ServiceMethod> mMethodServiceMethodMapCache = new ConcurrentHashMap<>();
 
@@ -46,10 +46,9 @@ public class Retrofit {
     }
 
     private <T> void validateInterface(Class<T> clazz) {
-        boolean isInterface = true;
         //判断clazz是否是接口
-        if (clazz.isInterface()) {
-            throw new RuntimeException("clazz is interface");
+        if (!clazz.isInterface()) {
+            throw new RuntimeException("clazz is not interface");
         }
         //判断clazz是否继承了其他的接口
         if (clazz.getInterfaces().length > 0) {
@@ -61,7 +60,8 @@ public class Retrofit {
         //从缓存 Map 中获取方法
         ServiceMethod serviceMethod = mMethodServiceMethodMapCache.get(method);
         if (serviceMethod == null) {
-            mMethodServiceMethodMapCache.put(method, new ServiceMethod.Builder(this, method).build());
+            serviceMethod = new ServiceMethod.Builder(this, method).build();
+            mMethodServiceMethodMapCache.put(method, serviceMethod);
         }
         return serviceMethod;
     }
